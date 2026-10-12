@@ -14,8 +14,16 @@ import { UserRole } from '../../types';
 export const Header: React.FC<{ onToggleSidebar: () => void; isSidebarOpen: boolean }> = ({
   onToggleSidebar,
 }) => {
-  const { currentUser, switchRole, settings, notifications, markNotificationRead, setCurrentView, logout } =
-    useApp();
+  const {
+    currentUser,
+    switchRole,
+    settings,
+    notifications,
+    markNotificationRead,
+    setCurrentView,
+    logout,
+    activeCategories,
+  } = useApp();
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showNotifMenu, setShowNotifMenu] = useState(false);
 
@@ -49,6 +57,14 @@ export const Header: React.FC<{ onToggleSidebar: () => void; isSidebarOpen: bool
             </span>
             <span className="hidden sm:inline-block text-xs font-semibold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
               Portal Asesmen Digital
+            </span>
+            <span
+              onClick={() => setCurrentView('dashboard')}
+              className="hidden lg:inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-0.5 rounded cursor-pointer hover:bg-emerald-100 transition-colors"
+              title="Jumlah jenis asesmen yang diberi tanda ceklist aktif pelaksanaan"
+            >
+              <span className="flex h-3 w-3 items-center justify-center rounded-xs bg-emerald-600 text-white text-[8px] font-black">✓</span>
+              <span>{activeCategories.length}/6 Asesmen Aktif Pelaksanaan</span>
             </span>
           </div>
           <span className="hidden md:inline-block text-xs text-slate-500">

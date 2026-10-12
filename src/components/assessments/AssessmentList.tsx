@@ -30,6 +30,8 @@ export const AssessmentList: React.FC<AssessmentListProps> = ({ forcedCategory }
     duplicateAssessment,
     setCurrentView,
     currentUser,
+    isCategoryActive,
+    toggleAssessmentCategoryActive,
   } = useApp();
 
   const [activeCategory, setActiveCategory] = useState<AssessmentCategoryType | 'all'>(
@@ -97,6 +99,54 @@ export const AssessmentList: React.FC<AssessmentListProps> = ({ forcedCategory }
               <p className="mt-1 text-xs text-slate-600 max-w-2xl leading-relaxed">
                 {currentCategoryInfo.description}
               </p>
+
+              {/* Fitur Kotak Ceklist: Status Aktif Pelaksanaan Asesmen */}
+              <div className="flex flex-wrap items-center gap-2.5 mt-3 pt-3 border-t border-slate-200/70">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (canManage && currentCategoryInfo) {
+                      toggleAssessmentCategoryActive(currentCategoryInfo.id);
+                    }
+                  }}
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold select-none transition-all ${
+                    canManage ? 'cursor-pointer hover:shadow-xs active:scale-98' : 'cursor-default'
+                  } ${
+                    isCategoryActive(currentCategoryInfo.id)
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                      : 'bg-white text-slate-700 border-slate-300 hover:border-slate-400'
+                  }`}
+                  title={
+                    canManage
+                      ? 'Klik untuk mengubah status ceklist jenis asesmen ini'
+                      : 'Status pelaksanaan ditentukan oleh Guru/Admin'
+                  }
+                >
+                  {/* Kotak Checklist */}
+                  <div
+                    className={`flex h-4.5 w-4.5 items-center justify-center rounded border transition-all ${
+                      isCategoryActive(currentCategoryInfo.id)
+                        ? 'border-white bg-white text-emerald-700'
+                        : 'border-slate-400 bg-white'
+                    }`}
+                  >
+                    {isCategoryActive(currentCategoryInfo.id) && (
+                      <Check className="h-3.5 w-3.5 stroke-[3]" />
+                    )}
+                  </div>
+                  <span>
+                    {isCategoryActive(currentCategoryInfo.id)
+                      ? 'Kotak Ceklist: [ ✓ ] AKTIF DIGUNAKAN UNTUK PELAKSANAAN'
+                      : 'Kotak Ceklist: [   ] NONAKTIF / BELUM DICEKLIST'}
+                  </span>
+                </button>
+
+                {canManage && (
+                  <span className="text-[11px] text-slate-500">
+                    💡 <em>Klik kotak ceklist di atas untuk mengaktifkan / menonaktifkan jenis asesmen ini.</em>
+                  </span>
+                )}
+              </div>
             </div>
 
             {canManage && (
@@ -152,26 +202,40 @@ export const AssessmentList: React.FC<AssessmentListProps> = ({ forcedCategory }
           >
             Semua ({assessments.length})
           </button>
-          {ASSESSMENT_CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-lg font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 ${
-                activeCategory === cat.id
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
-              }`}
-            >
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: cat.accentColor }}
-              />
-              <span>{cat.badgeLabel}</span>
-              <span className="opacity-75 text-[11px] tabular-nums">
-                ({assessments.filter((a) => a.category === cat.id).length})
-              </span>
-            </button>
-          ))}
+          {ASSESSMENT_CATEGORIES.map((cat) => {
+            const isCatActive = isCategoryActive(cat.id);
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                  activeCategory === cat.id
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                {/* Kotak Checklist Status */}
+                <span
+                  className={`flex h-3.5 w-3.5 items-center justify-center rounded-xs border text-[9px] font-black ${
+                    isCatActive
+                      ? 'border-emerald-500 bg-emerald-500 text-white'
+                      : 'border-slate-300 bg-white text-transparent'
+                  }`}
+                  title={isCatActive ? 'Status: Aktif Diceklist' : 'Status: Nonaktif'}
+                >
+                  {isCatActive ? '✓' : ''}
+                </span>
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: cat.accentColor }}
+                />
+                <span>{cat.badgeLabel}</span>
+                <span className="opacity-75 text-[11px] tabular-nums">
+                  ({assessments.filter((a) => a.category === cat.id).length})
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
 

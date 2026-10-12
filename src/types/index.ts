@@ -97,6 +97,7 @@ export interface AssessmentCategoryInfo {
   accentColor: string; // Hex color for visual distinction
   textColor: string;
   bgLightColor: string;
+  isActive?: boolean;
 }
 
 export interface Assessment {
@@ -214,4 +215,5 @@ export interface InstitutionSettings {
   activeSemester: 'Ganjil' | 'Genap';
   timezone: string; // 'Asia/Makassar' (WITA)
   logoUrl?: string;
+  activeAssessmentCategories?: AssessmentCategoryType[];
 }

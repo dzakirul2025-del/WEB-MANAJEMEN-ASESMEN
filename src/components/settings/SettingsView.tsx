@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   AlertCircle,
   CheckCircle2,
+  CheckSquare,
   Database,
   Download,
   RotateCcw,
@@ -12,6 +13,7 @@ import {
   UploadCloud,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { ActiveCategoriesChecklist } from '../assessments/ActiveCategoriesChecklist';
 
 export const SettingsView: React.FC = () => {
   const { settings, updateSettings, backupDatabase, restoreDatabase, resetToDefault } = useApp();
@@ -260,6 +262,9 @@ export const SettingsView: React.FC = () => {
           </div>
         </div>
       </form>
+
+      {/* Checklist Fitur: Aktivasi Jenis Asesmen Pelaksanaan */}
+      <ActiveCategoriesChecklist />
 
       {/* Database Backup & Restore */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xs space-y-4 text-xs">

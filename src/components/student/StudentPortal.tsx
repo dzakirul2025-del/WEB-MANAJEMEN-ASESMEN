@@ -4,7 +4,9 @@ import {
   Award,
   BookOpen,
   Calendar,
+  Check,
   CheckCircle,
+  CheckSquare,
   Clock,
   ExternalLink,
   FileText,
@@ -19,7 +21,7 @@ import { Assessment } from '../../types';
 import { useApp } from '../../context/AppContext';
 
 export const StudentPortal: React.FC = () => {
-  const { currentUser, assessments, subjects, scores, announcements } = useApp();
+  const { currentUser, assessments, subjects, scores, announcements, isCategoryActive } = useApp();
 
   const [activeTab, setActiveTab] = useState<'berlangsung' | 'akan_datang' | 'riwayat'>('berlangsung');
   const [selectedInstructionsAssessment, setSelectedInstructionsAssessment] = useState<Assessment | null>(null);
@@ -95,7 +97,7 @@ export const StudentPortal: React.FC = () => {
         </div>
       </div>
 
-      {/* Class Pinned Announcements */}
+      {/* Pinned Class Announcements */}
       {announcements.filter((a) => a.targetAudience === 'Semua' || a.targetAudience === studentRombel || a.targetAudience === 'Peserta Didik').length > 0 && (
         <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4">
           <div className="flex items-center gap-2 text-xs font-bold text-amber-900 mb-1.5">
@@ -114,6 +116,67 @@ export const StudentPortal: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Kotak Ceklist: Jenis Asesmen yang Aktif Digunakan untuk Pelaksanaan */}
+      <div className="rounded-xl border-2 border-emerald-200 bg-white p-4 shadow-xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-600 text-white">
+              <CheckSquare className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-sm font-extrabold text-slate-900">
+                Jenis Asesmen Aktif Pelaksanaan Ujian Madrasah
+              </h3>
+              <p className="text-[11px] text-slate-500">
+                Kotak bertanda ceklist [ ✓ ] menunjukkan jenis asesmen yang sedang aktif dibuka untuk pelaksanaan ujian.
+              </p>
+            </div>
+          </div>
+          <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full self-start sm:self-auto flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
+            <span>Pelaksanaan Asesmen Dibuka</span>
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          {ASSESSMENT_CATEGORIES.map((cat) => {
+            const isActive = isCategoryActive(cat.id);
+            return (
+              <div
+                key={cat.id}
+                className={`rounded-lg border p-2 text-center transition-all flex flex-col items-center justify-between gap-1.5 ${
+                  isActive
+                    ? 'border-emerald-300 bg-emerald-50/70 shadow-2xs'
+                    : 'border-slate-200 bg-slate-50/50 opacity-60'
+                }`}
+              >
+                {/* Kotak dengan Tanda Ceklist */}
+                <div
+                  className={`flex h-5 w-5 items-center justify-center rounded border transition-all ${
+                    isActive
+                      ? 'border-emerald-600 bg-emerald-600 text-white shadow-2xs'
+                      : 'border-slate-300 bg-white'
+                  }`}
+                  title={isActive ? 'Aktif digunakan untuk ujian' : 'Tidak aktif saat ini'}
+                >
+                  {isActive && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                </div>
+                <span className="text-[11px] font-bold text-slate-900 line-clamp-1">
+                  {cat.badgeLabel}
+                </span>
+                <span
+                  className={`text-[9px] font-semibold px-1.5 py-0.2 rounded ${
+                    isActive ? 'text-emerald-800 bg-emerald-100/90' : 'text-slate-400 bg-slate-100'
+                  }`}
+                >
+                  {isActive ? 'Aktif Ujian' : 'Nonaktif'}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Tabs Filter */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2">

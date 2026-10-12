@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
+  ASSESSMENT_CATEGORIES,
   INITIAL_ANNOUNCEMENTS,
   INITIAL_ASSESSMENTS,
   INITIAL_AUDIT_LOGS,
@@ -43,6 +44,11 @@ interface AppContextType {
   loginTeacher: (fullName: string, nip: string) => { success: boolean; message?: string };
   loginSuperAdmin: (user: string, password: string) => { success: boolean; message?: string };
   logout: () => void;
+
+  // Active Assessment Categories Checklist
+  activeCategories: AssessmentCategoryType[];
+  toggleAssessmentCategoryActive: (categoryId: AssessmentCategoryType) => void;
+  isCategoryActive: (categoryId: AssessmentCategoryType) => boolean;
 
   // Institution settings
   settings: InstitutionSettings;
@@ -170,6 +176,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     getStorage<InstitutionSettings>(STORAGE_KEYS.SETTINGS, INITIAL_INSTITUTION_SETTINGS)
   );
 
+  const [activeCategories, setActiveCategories] = useState<AssessmentCategoryType[]>(() => {
+    return getStorage<AssessmentCategoryType[]>(
+      'min1paser_active_categories',
+      INITIAL_INSTITUTION_SETTINGS.activeAssessmentCategories || ['formatif', 'sumatif_akhir_bab', 'sas', 'try_out', 'tka']
+    );
+  });
+
   const [students, setStudents] = useState<Student[]>(() =>
     getStorage<Student[]>(STORAGE_KEYS.STUDENTS, INITIAL_STUDENTS)
   );
@@ -244,6 +257,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => setStorage(STORAGE_KEYS.AUDIT_LOGS, auditLogs), [auditLogs]);
   useEffect(() => setStorage(STORAGE_KEYS.NOTIFICATIONS, notifications), [notifications]);
   useEffect(() => setStorage('min1paser_is_authenticated', isAuthenticated), [isAuthenticated]);
+  useEffect(() => setStorage('min1paser_active_categories', activeCategories), [activeCategories]);
+
+  const toggleAssessmentCategoryActive = (categoryId: AssessmentCategoryType) => {
+    setActiveCategories((prev) => {
+      const isCurrentlyActive = prev.includes(categoryId);
+      let updated: AssessmentCategoryType[];
+      if (isCurrentlyActive) {
+        if (prev.length <= 1) {
+          alert('Minimal harus ada 1 jenis asesmen yang aktif.');
+          return prev;
+        }
+        updated = prev.filter((c) => c !== categoryId);
+      } else {
+        updated = [...prev, categoryId];
+      }
+
+      const catMeta = ASSESSMENT_CATEGORIES.find((c) => c.id === categoryId);
+      logAction(
+        isCurrentlyActive ? 'Nonaktifkan Jenis Asesmen' : 'Aktivasi Jenis Asesmen (Diceklis)',
+        `Jenis asesmen [${catMeta?.title || categoryId}] diubah statusnya menjadi: ${!isCurrentlyActive ? 'AKTIF (Diceklis)' : 'NON-AKTIF'}.`
+      );
+
+      setSettings((s) => ({ ...s, activeAssessmentCategories: updated }));
+      return updated;
+    });
+  };
+
+  const isCategoryActive = (categoryId: AssessmentCategoryType) => {
+    return activeCategories.includes(categoryId);
+  };
 
   // LOGIN HANDLERS
   const loginStudent = (
@@ -252,7 +295,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     rombel?: string
   ): { success: boolean; message?: string } => {
     const cleanName = fullName.trim().toLowerCase();
-    const matched = students.find((s) => {
+    
+    // First try strict match with rombel if specified
+    let matched = students.find((s) => {
       const matchName =
         s.fullName.toLowerCase() === cleanName ||
         s.fullName.toLowerCase().includes(cleanName) ||
@@ -262,10 +307,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return matchName && matchNumber && matchRombel;
     });
 
+    // If not found with rombel filter, search across all rombel by name & number
+    if (!matched) {
+      matched = students.find((s) => {
+        const matchName =
+          s.fullName.toLowerCase() === cleanName ||
+          s.fullName.toLowerCase().includes(cleanName) ||
+          cleanName.includes(s.fullName.toLowerCase());
+        const matchNumber = s.attendanceNumber === attendanceNumber;
+        return matchName && matchNumber;
+      });
+    }
+
     if (!matched) {
       return {
         success: false,
-        message: `Data siswa tidak ditemukan. Pastikan Nama Lengkap dan Nomor Absen (${attendanceNumber}) sesuai dengan data kelas.`,
+        message: `Data siswa tidak ditemukan. Pastikan Nama Lengkap dan Nomor Absen (${attendanceNumber}) cocok dengan data peserta didik MIN 1 Paser.`,
       };
     }
 
@@ -293,14 +350,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     nip: string
   ): { success: boolean; message?: string } => {
     const cleanName = teacherName.trim().toLowerCase();
-    const cleanNip = nip.trim();
+    const cleanNip = nip.trim().replace(/\s+/g, '');
 
     const matched = teachers.find((t) => {
       const matchName =
         t.fullName.toLowerCase() === cleanName ||
         t.fullName.toLowerCase().includes(cleanName) ||
         cleanName.includes(t.fullName.toLowerCase());
-      const matchNip = t.nip && t.nip.trim() === cleanNip;
+      const matchNip = t.nip && t.nip.trim().replace(/\s+/g, '') === cleanNip;
       return matchName && matchNip;
     });
 
@@ -778,6 +835,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         loginTeacher,
         loginSuperAdmin,
         logout,
+        activeCategories,
+        toggleAssessmentCategoryActive,
+        isCategoryActive,
         settings,
         updateSettings,
         students,

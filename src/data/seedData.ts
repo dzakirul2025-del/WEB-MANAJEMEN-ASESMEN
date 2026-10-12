@@ -30,6 +30,7 @@ export const INITIAL_INSTITUTION_SETTINGS: InstitutionSettings = {
   academicYear: '2026/2027',
   activeSemester: 'Ganjil',
   timezone: 'Asia/Makassar',
+  activeAssessmentCategories: ['formatif', 'sumatif_akhir_bab', 'sas', 'try_out', 'tka'],
 };
 
 export const ASSESSMENT_CATEGORIES: AssessmentCategoryInfo[] = [

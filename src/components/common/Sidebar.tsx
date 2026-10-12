@@ -21,6 +21,7 @@ import {
   User,
   Users,
   LogOut,
+  Check,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { AssessmentCategoryType } from '../../types';
@@ -31,7 +32,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { currentUser, currentView, setCurrentView, setSelectedCategoryFilter, settings, logout } = useApp();
+  const { currentUser, currentView, setCurrentView, setSelectedCategoryFilter, settings, logout, isCategoryActive } = useApp();
 
   const isStudent = currentUser.role === 'siswa';
   const isSuperAdmin = currentUser.role === 'super_admin';
@@ -189,98 +190,50 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
               {/* SECTION: 6 KATEGORI ASESMEN WAJIB */}
               <div className="space-y-1">
-                <div className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  6 Kategori Asesmen
+                <div className="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                  <span>6 Kategori Asesmen</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Ceklist Aktif</span>
                 </div>
-                <button
-                  onClick={() => navigateToCategory('formatif')}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-                    currentView === 'cat-formatif'
-                      ? 'bg-sky-50 text-sky-800 font-semibold'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="h-2 w-2 rounded-full bg-sky-500" />
-                    <span>Asesmen Formatif</span>
-                  </div>
-                  <ChevronRight className="h-3 w-3 text-slate-400" />
-                </button>
+                {[
+                  { id: 'formatif', name: 'Asesmen Formatif', color: 'bg-sky-500' },
+                  { id: 'sumatif_akhir_bab', name: 'Sumatif Akhir Bab', color: 'bg-emerald-500' },
+                  { id: 'sas', name: 'Sumatif Akhir Semester (SAS)', color: 'bg-indigo-500' },
+                  { id: 'sat', name: 'Sumatif Akhir Tahun (SAT)', color: 'bg-violet-500' },
+                  { id: 'try_out', name: 'Try Out Asesmen', color: 'bg-amber-500' },
+                  { id: 'tka', name: 'Tes Kemampuan Akademik (TKA)', color: 'bg-rose-500' },
+                ].map((item) => {
+                  const isActive = isCategoryActive(item.id as AssessmentCategoryType);
+                  const isCurrent = currentView === `cat-${item.id}`;
 
-                <button
-                  onClick={() => navigateToCategory('sumatif_akhir_bab')}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-                    currentView === 'cat-sumatif_akhir_bab'
-                      ? 'bg-emerald-50 text-emerald-800 font-semibold'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    <span>Sumatif Akhir Bab</span>
-                  </div>
-                  <ChevronRight className="h-3 w-3 text-slate-400" />
-                </button>
-
-                <button
-                  onClick={() => navigateToCategory('sas')}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-                    currentView === 'cat-sas'
-                      ? 'bg-indigo-50 text-indigo-800 font-semibold'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="h-2 w-2 rounded-full bg-indigo-500" />
-                    <span>Sumatif Akhir Semester (SAS)</span>
-                  </div>
-                  <ChevronRight className="h-3 w-3 text-slate-400" />
-                </button>
-
-                <button
-                  onClick={() => navigateToCategory('sat')}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-                    currentView === 'cat-sat'
-                      ? 'bg-violet-50 text-violet-800 font-semibold'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="h-2 w-2 rounded-full bg-violet-500" />
-                    <span>Sumatif Akhir Tahun (SAT)</span>
-                  </div>
-                  <ChevronRight className="h-3 w-3 text-slate-400" />
-                </button>
-
-                <button
-                  onClick={() => navigateToCategory('try_out')}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-                    currentView === 'cat-try_out'
-                      ? 'bg-amber-50 text-amber-800 font-semibold'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="h-2 w-2 rounded-full bg-amber-500" />
-                    <span>Try Out Asesmen</span>
-                  </div>
-                  <ChevronRight className="h-3 w-3 text-slate-400" />
-                </button>
-
-                <button
-                  onClick={() => navigateToCategory('tka')}
-                  className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-                    currentView === 'cat-tka'
-                      ? 'bg-rose-50 text-rose-800 font-semibold'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="h-2 w-2 rounded-full bg-rose-500" />
-                    <span>Tes Kemampuan Akademik (TKA)</span>
-                  </div>
-                  <ChevronRight className="h-3 w-3 text-slate-400" />
-                </button>
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => navigateToCategory(item.id as AssessmentCategoryType)}
+                      className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
+                        isCurrent
+                          ? 'bg-blue-50 text-blue-900 font-semibold'
+                          : 'text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {/* Box with checklist */}
+                        <div
+                          className={`flex h-3.5 w-3.5 items-center justify-center rounded border ${
+                            isActive
+                              ? 'border-emerald-600 bg-emerald-600 text-white'
+                              : 'border-slate-300 bg-white'
+                          }`}
+                          title={isActive ? 'Aktif digunakan' : 'Non-aktif'}
+                        >
+                          {isActive && <Check className="h-2.5 w-2.5 stroke-[3]" />}
+                        </div>
+                        <span className={`h-1.5 w-1.5 rounded-full ${item.color}`} />
+                        <span className="truncate">{item.name}</span>
+                      </div>
+                      <ChevronRight className="h-3 w-3 text-slate-400 shrink-0" />
+                    </button>
+                  );
+                })}
               </div>
 
               {/* SECTION: NILAI & LAPORAN */}
