@@ -1,0 +1,6 @@
+{
+  "name": "Portal Asesmen Digital MIN 1 Paser",
+  "description": "Portal terpadu asesmen digital Madrasah Ibtidaiyah Negeri 1 Paser untuk pengelolaan asesmen formatif, sumatif, try out, dan TKA terintegrasi tautan multi-platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
