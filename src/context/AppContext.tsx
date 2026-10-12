@@ -59,6 +59,12 @@ interface AppContextType {
   addStudent: (student: Omit<Student, 'id'>) => void;
   updateStudent: (student: Student) => void;
   deleteStudent: (id: string) => void;
+  deleteStudentsBulk: (ids: string[]) => void;
+  updateStudentsRombelBulk: (ids: string[], targetRombel: string, targetClassId: string) => void;
+  importStudentsBulk: (
+    students: Array<Omit<Student, 'id'>>,
+    updateExisting?: boolean
+  ) => { added: number; updated: number; total: number };
 
   teachers: Teacher[];
   addTeacher: (teacher: Omit<Teacher, 'id'>) => void;
@@ -510,6 +516,67 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (std) logAction('Penghapusan Peserta Didik', `Menghapus siswa: ${std.fullName} (${std.nis})`);
   };
 
+  const deleteStudentsBulk = (ids: string[]) => {
+    setStudents((prev) => prev.filter((s) => !ids.includes(s.id)));
+    logAction('Penghapusan Massal Peserta Didik', `Menghapus ${ids.length} siswa secara massal.`);
+  };
+
+  const updateStudentsRombelBulk = (ids: string[], targetRombel: string, targetClassId: string) => {
+    setStudents((prev) =>
+      prev.map((s) =>
+        ids.includes(s.id) ? { ...s, rombel: targetRombel, classId: targetClassId } : s
+      )
+    );
+    logAction(
+      'Pemindahan Rombel Massal',
+      `Memindahkan ${ids.length} siswa ke rombel ${targetRombel}.`
+    );
+  };
+
+  const importStudentsBulk = (
+    incomingList: Array<Omit<Student, 'id'>>,
+    updateExisting: boolean = true
+  ): { added: number; updated: number; total: number } => {
+    let addedCount = 0;
+    let updatedCount = 0;
+
+    setStudents((prev) => {
+      const currentList = [...prev];
+      incomingList.forEach((incoming) => {
+        const existingIndex = currentList.findIndex(
+          (s) =>
+            s.nis.trim().toLowerCase() === incoming.nis.trim().toLowerCase() ||
+            (incoming.nisn && s.nisn && s.nisn.trim() === incoming.nisn.trim())
+        );
+
+        if (existingIndex >= 0) {
+          if (updateExisting) {
+            currentList[existingIndex] = {
+              ...currentList[existingIndex],
+              ...incoming,
+              id: currentList[existingIndex].id,
+            };
+            updatedCount++;
+          }
+        } else {
+          currentList.push({
+            ...incoming,
+            id: `std-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          });
+          addedCount++;
+        }
+      });
+      return currentList;
+    });
+
+    logAction(
+      'Impor Data Siswa Excel',
+      `Berhasil impor data siswa dari Excel: ${addedCount} baru, ${updatedCount} diperbarui.`
+    );
+
+    return { added: addedCount, updated: updatedCount, total: addedCount + updatedCount };
+  };
+
   const addTeacher = (newTch: Omit<Teacher, 'id'>) => {
     const tch: Teacher = { ...newTch, id: `tch-${Date.now()}` };
     setTeachers((prev) => [...prev, tch]);
@@ -844,6 +911,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addStudent,
         updateStudent,
         deleteStudent,
+        deleteStudentsBulk,
+        updateStudentsRombelBulk,
+        importStudentsBulk,
         teachers,
         addTeacher,
         updateTeacher,

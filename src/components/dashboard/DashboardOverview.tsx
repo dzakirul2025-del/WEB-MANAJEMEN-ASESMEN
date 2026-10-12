@@ -168,14 +168,24 @@ export const DashboardOverview: React.FC = () => {
 
       {/* Madrasah Master Stats Strip */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
-            <GraduationCap className="h-5 w-5" />
+        <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+              <GraduationCap className="h-5 w-5" />
+            </div>
+            <div>
+              <span className="text-base font-bold text-slate-900 tabular-nums">{students.length}</span>
+              <span className="text-xs text-slate-500 block">Peserta Didik Terdaftar</span>
+            </div>
           </div>
-          <div>
-            <span className="text-base font-bold text-slate-900 tabular-nums">{students.length}</span>
-            <span className="text-xs text-slate-500 block">Peserta Didik Terdaftar</span>
-          </div>
+          <button
+            onClick={() => setCurrentView('students')}
+            className="text-[11px] font-semibold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1 shadow-2xs"
+            title="Buka Data Siswa & Impor File Excel"
+          >
+            <span>Input & Impor Excel</span>
+            <ArrowRight className="h-3 w-3" />
+          </button>
         </div>
 
         <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5 shadow-xs">
